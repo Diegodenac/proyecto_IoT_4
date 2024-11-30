@@ -1,0 +1,6 @@
+SQL statement quality_air_report
+
+SELECT timestamp() AS timestamp, topic(3) AS thing_name, substring(topic(3), 11) AS serial, state.reported.ppm_level AS ppm_level, state.reported.detected_type AS detected_type FROM '$aws/things/+/shadow/update/accepted' WHERE substring(topic(3),0,10) = 'alarm_fire' AND state.reported.ppm_level > 0
+
+SQL version
+2016-03-23

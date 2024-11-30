@@ -1,0 +1,7 @@
+SQL statement reset_intruder_detected
+
+SQL statement
+SELECT topic(3) AS thing FROM '$aws/things/+/shadow/update/accepted' WHERE state.desired.alarm_armed = 0 AND substring(topic(3),0,14) = 'alarm_intruder'
+
+SQL version
+2016-03-23

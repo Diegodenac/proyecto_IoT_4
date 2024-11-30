@@ -1,0 +1,6 @@
+SQL statement turn_off_buzzer
+
+SELECT topic(3) AS thing, state.desired.alarm_armed AS message FROM '$aws/things/+/shadow/update/accepted' WHERE substring(topic(3),0,14) = 'alarm_intruder'AND (state.desired.alarm_armed = 0 OR state.desired.alarm_armed = 1)
+
+SQL version
+2016-03-23
