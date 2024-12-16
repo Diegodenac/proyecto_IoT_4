@@ -51,6 +51,16 @@ const CloseValveParams = {
     payload: '{"state": {"desired": {"valve_state": 0}}}'
 };
 
+const AdjustFireUmbralParams = {
+    thingName: '',
+    payload: ''
+};
+
+const AdjustReportsUmbralParams = {
+    thingName: '',
+    payload: ''
+};
+
 const ShadowFireParams = {
     thingName: ''
 };
@@ -59,6 +69,8 @@ function setAlarmFireThing(thing){
     OpenValveParams.thingName = thing;
     CloseValveParams.thingName = thing;
     ShadowFireParams.thingName = thing;
+    AdjustFireUmbralParams.thingName = thing;
+    AdjustReportsUmbralParams.thingName = thing;
 };
 
 function getShadowPromise(params) {
@@ -336,6 +348,54 @@ const QualityAirIntentHandler = {
     }
 };
 
+const AdjustFireUmbralIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
+               Alexa.getIntentName(handlerInput.requestEnvelope) === 'AdjustFireUmbralIntent';
+    },
+    handle(handlerInput) {
+        var speakOutput = "Debes iniciar sesion con un usuario para continuar";
+        const fireUmbral = Alexa.getSlotValue(handlerInput.requestEnvelope, 'fire_umbral_ppm');
+        AdjustFireUmbralParams.payload = `{"state": {"desired": {"fire_umbral_ppm": ${fireUmbral}}}}`;
+        try{
+            IotData.updateThingShadow(AdjustFireUmbralParams, function(err, data) {
+                if (err) console.log(err);
+            });
+            speakOutput = 'Cambiando sensibilidad de detección de incendios';
+        } catch(error){
+            console.error('Error al publicar en shadow:', error);
+        }
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+
+const AdjustReportUmbralIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
+               Alexa.getIntentName(handlerInput.requestEnvelope) === 'AdjustReportUmbralIntent';
+    },
+    handle(handlerInput) {
+        var speakOutput = "Debes iniciar sesion con un usuario para continuar";
+        const reportsUmbral = Alexa.getSlotValue(handlerInput.requestEnvelope, 'reports_umbral_ppm');
+        AdjustReportsUmbralParams.payload = `{"state": {"desired": {"reports_umbral_ppm": ${reportsUmbral}}}}`;
+        try{
+            IotData.updateThingShadow(AdjustReportsUmbralParams, function(err, data) {
+                if (err) console.log(err);
+            });
+            speakOutput = 'Cambiando sensibilidad de reportes de calidad del aire';
+        } catch(error){
+            console.error('Error al publicar en shadow:', error);
+        }
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
@@ -436,6 +496,8 @@ export const handler = Alexa.SkillBuilders.custom()
         OpenValveIntentHandler,
         CloseValveIntentHandler,
         QualityAirIntentHandler,
+        AdjustFireUmbralIntentHandler,
+        AdjustReportUmbralIntentHandler,
         //OTHERS
         HelpIntentHandler,
         CancelAndStopIntentHandler,

@@ -4,12 +4,11 @@
 #include <WiFiClientSecure.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <WiFiManager.h>
 class ClientManager
 {
 private:
-    const char* WIFI_SSID;
-    const char* WIFI_PASS; 
-    const char* MQTT_BROKER; 
+    const char* MQTT_BROKER;  
     int MQTT_PORT;
     const char* CLIENT_ID;
     PubSubClient client;
@@ -17,9 +16,7 @@ private:
     const char* PUBLISH_TOPIC;
     const char* SUBSCRIBE_TOPIC;
 public:
-    ClientManager(const char* ssidWifi, const char* passWifi, const char* brokerDomain, int portBroker, const char* clientId, const char* publishTopic, const char* subscribeTopic) : client(wiFiClient){
-      this->WIFI_SSID = ssidWifi;
-      this->WIFI_PASS = passWifi;
+    ClientManager(const char* brokerDomain, int portBroker, const char* clientId, const char* publishTopic, const char* subscribeTopic) : client(wiFiClient){
       this->MQTT_BROKER = brokerDomain;
       this->MQTT_PORT = portBroker;
       this->CLIENT_ID = clientId;
@@ -34,17 +31,13 @@ public:
     }
 
     void setupWiFi() {
-        delay(10);
-        Serial.println();
-        Serial.print("Connecting to ");
-        Serial.println(WIFI_SSID);
-
-        WiFi.begin(WIFI_SSID, WIFI_PASS);
-        while (WiFi.status() != WL_CONNECTED) {
-            delay(500);
-            Serial.print(".");
+        WiFiManager wm;
+        const char* apName = "FireAlarmAP";
+        const char* apPassword = "admin123";
+        if (!wm.autoConnect(apName, apPassword)) {
+            Serial.println("No se pudo conectar a WiFi. Reiniciando...");
+            ESP.restart();
         }
-        Serial.println();
         Serial.print("Connected to WiFi. IP address: ");
         Serial.println(WiFi.localIP());
     }

@@ -2,10 +2,6 @@
 #include "ClientManager.h"
 #include <ArduinoJson.h>
 
-// Replace with your network credentials
-const char* WIFI_SSID = "Android4444";
-const char* WIFI_PASS = "jdp269gaj";
-
 // Replace with your MQTT broker details
 const char* MQTT_BROKER = "a2gyx6o3r72s2g-ats.iot.us-east-1.amazonaws.com";
 const int MQTT_PORT = 8883;
@@ -95,7 +91,7 @@ const int MOVEMENT_DETECTOR_PIN = 14;
 const int BUZZER_PIN = 12;
 
 //objetct instance
-ClientManager* networkManager = new ClientManager(WIFI_SSID, WIFI_PASS, MQTT_BROKER, MQTT_PORT, CLIENT_ID, UPDATE_TOPIC, UPDATE_DELTA_TOPIC);
+ClientManager* networkManager = new ClientManager(MQTT_BROKER, MQTT_PORT, CLIENT_ID, UPDATE_TOPIC, UPDATE_DELTA_TOPIC);
 IntruderAlarm intruderAlarm(networkManager, MOVEMENT_DETECTOR_PIN, BUZZER_PIN);
 // Callback function to handle messages received from the subscribed topic
 byte payloadAlarm = 0;

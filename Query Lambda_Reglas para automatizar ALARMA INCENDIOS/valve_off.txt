@@ -1,6 +1,6 @@
 SQL statement valve_off
 
-SELECT topic(3) As thing FROM '$aws/things/+/shadow/update/accepted' WHERE state.reported.detected_type <> 'smoke' AND substring(topic(3),0,10) = 'alarm_fire'
+SELECT topic(3) As thing FROM '$aws/things/+/shadow/update/accepted' WHERE state.reported.fire_detected = 0 AND substring(topic(3),0,10) = 'alarm_fire'
 
 SQL version
 2016-03-23

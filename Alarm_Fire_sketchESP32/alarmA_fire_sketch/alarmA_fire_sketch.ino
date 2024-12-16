@@ -2,10 +2,6 @@
 #include "ClientManager.h"
 #include <ArduinoJson.h>
 
-// Replace with your network credentials
-const char* WIFI_SSID = "Android4444";
-const char* WIFI_PASS = "jdp269gaj";
-
 // Replace with your MQTT broker details
 const char* MQTT_BROKER = "a2gyx6o3r72s2g-ats.iot.us-east-1.amazonaws.com";
 const int MQTT_PORT = 8883;
@@ -96,8 +92,8 @@ const int MQ2_ppm_PIN = 35; // analogic pin MQ2
 const int MQ2_type_PIN = 32; // digital pin MQ2
 
 //objetct instance
-ClientManager* networkManager = new ClientManager(WIFI_SSID, WIFI_PASS, MQTT_BROKER, MQTT_PORT, CLIENT_ID, UPDATE_TOPIC, UPDATE_DELTA_TOPIC);
-FireAlarm fireAlarm(networkManager, VALVE_PIN, MQ2_type_PIN,MQ2_ppm_PIN);
+ClientManager* networkManager = new ClientManager(MQTT_BROKER, MQTT_PORT, CLIENT_ID, UPDATE_TOPIC, UPDATE_DELTA_TOPIC);
+FireAlarm fireAlarm(networkManager, VALVE_PIN, MQ2_type_PIN, MQ2_ppm_PIN);
 
 // Callback function to handle messages received from the subscribed topic
 byte payloadValve = 0;
@@ -114,6 +110,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
       if (inputDoc["state"].containsKey("valve_state")) {
         fireAlarm.setValveActivation(inputDoc["state"]["valve_state"].as<int8_t>());
       }
+      if (inputDoc["state"].containsKey("fire_umbral_ppm")) {
+        fireAlarm.setFireUmbralPpm(inputDoc["state"]["fire_umbral_ppm"].as<int8_t>());
+      }
+      if (inputDoc["state"].containsKey("reports_umbral_ppm")) {
+        fireAlarm.setReportsUmbralPpm(inputDoc["state"]["reports_umbral_ppm"].as<int8_t>());
+      }
     }
   }
 }
@@ -126,6 +128,10 @@ void setup() {
   networkManager->setupWiFi();
   networkManager->setUpCredentials(AMAZON_ROOT_CA1, CERTIFICATE, PRIVATE_KEY);
   networkManager->setMqttConnection(callback);
+  fireAlarm.reportValveActivation();
+  fireAlarm.reportFireUmbralPpm();
+  fireAlarm.reportReportsUmbralPpm();
+  fireAlarm.reportFireDetection();
 }
 
 void loop() {
@@ -135,7 +141,7 @@ void loop() {
   }
 
   fireAlarm.readDetection();
-  fireAlarm.reportTypeAndPPM();
+  if(fireAlarm.reportValid()) fireAlarm.reportTypeAndPPM();
   networkManager->listenMessages();
-  delay(5000);
+  delay(1000);
 }
